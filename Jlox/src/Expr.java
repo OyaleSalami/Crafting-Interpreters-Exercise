@@ -14,9 +14,9 @@ abstract class Expr
 
 	static class Binary extends Expr 
 	{
-		Binary(Expr Left, Token operator, Expr right) 
+		Binary(Expr left, Token operator, Expr right) 
 		{
-			this.Left = Left;
+			this.left = left;
 			this.operator = operator;
 			this.right = right;
 		}
@@ -27,16 +27,16 @@ abstract class Expr
 			return visitor.visitBinaryExpr(this);
 		}
 
-		final Expr Left;
+		final Expr left;
 		final Token operator;
 		final Expr right;
 	}
 
 	static class Grouping extends Expr 
 	{
-		Grouping(Expr expresion) 
+		Grouping(Expr expression) 
 		{
-			this.expresion = expresion;
+			this.expression = expression;
 		}
 
 		@Override
@@ -45,14 +45,14 @@ abstract class Expr
 			return visitor.visitGroupingExpr(this);
 		}
 
-		final Expr expresion;
+		final Expr expression;
 	}
 
 	static class Literal extends Expr 
 	{
-		Literal(Object Value) 
+		Literal(Object value) 
 		{
-			this.Value = Value;
+			this.value = value;
 		}
 
 		@Override
@@ -61,7 +61,7 @@ abstract class Expr
 			return visitor.visitLiteralExpr(this);
 		}
 
-		final Object Value;
+		final Object value;
 	}
 
 	static class Unary extends Expr 

@@ -17,9 +17,9 @@ public class GenerateAst
 
 		String outputDir = args[0];
 		defineAst(outputDir, "Expr", Arrays.asList(
-			"Binary : Expr Left, Token operator, Expr right",
-			"Grouping : Expr expresion",
-			"Literal : Object Value",
+			"Binary : Expr left, Token operator, Expr right",
+			"Grouping : Expr expression",
+			"Literal : Object value",
 			"Unary : Token operator, Expr right"
 		));
 	}
@@ -43,10 +43,9 @@ public class GenerateAst
 			String className = type.split(":")[0].trim();
 			String fields = type.split(":")[1].trim();
 			defineType(writer, baseName, className, fields);
-
-			//The base accept() method
 		}
 
+		//The base accept() method
 		writer.println();
 		writer.println("\tabstract <R> R accept(Visitor<R> visitor);");
 
