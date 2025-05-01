@@ -21,7 +21,7 @@ class Parser
 		List<Stmt> statements = new ArrayList<>();
 		while(!isAtEnd())
 		{
-			statements.add(statement());
+			statements.add(declaration());
 		}
 
 		return statements;
@@ -29,7 +29,22 @@ class Parser
 
 	private Expr expression()
 	{
-		return equality();	
+		return assignment();	
+	}
+
+	private Stmt declaration()
+	{
+		try
+		{
+			if(match(VAR)) return varDeclaration();
+
+			return statement();
+		}
+		catch(ParseError error)
+		{
+			synchronize();
+			return null;
+		}
 	}
 
 	private Stmt statement()
@@ -46,12 +61,49 @@ class Parser
 		return new Stmt.Print(value);
 	}
 
+	private Stmt varDeclaration()
+	{
+		Token name = consume(IDENTIFIER, "Expect variable name.");
+
+		Expr initializer = null;
+		if (match(EQUAL))
+		{
+			initializer = expression();
+		}
+
+		consume(SEMICOLON, "Expect ';' after variable declaration.");
+		return new Stmt.Var(name, initializer);
+	}
+
+
 	private Stmt expressionStatement()
 	{
 		Expr expr = expression();
 		consume(SEMICOLON, "Expect ';' after expression.");
 		return new Stmt.Expression(expr);
 	}
+
+	private Expr assignment()
+	{
+		Expr expr = equality();
+
+		if (match(EQUAL))
+		{
+			Token equals = previous();
+			Expr value = assignment();
+
+			if (expr instanceof Expr.Variable)
+			{
+				Token name = ((Expr.Variable)expr).name;
+				return new Expr.Assign(name, value);
+			}
+
+			error(equals, "Invalid assignment target.");
+		}
+
+		return expr;
+	}
+
 
 	private Expr equality()
 	{
@@ -111,7 +163,7 @@ class Parser
 
 	private Expr unary()
 	{
-		if(match(BANG, MINUS))
+		if (match(BANG, MINUS))
 		{
 			Token operator = previous();
 			Expr right = unary();
@@ -123,13 +175,18 @@ class Parser
 
 	private Expr primary()
 	{
-		if(match(FALSE)) return new Expr.Literal(false);
-		if(match(TRUE)) return new Expr.Literal(true);
-		if(match(NIL)) return new Expr.Literal(null);
+		if (match(FALSE)) return new Expr.Literal(false);
+		if (match(TRUE)) return new Expr.Literal(true);
+		if (match(NIL)) return new Expr.Literal(null);
 
-		if(match(NUMBER, STRING))
+		if (match(NUMBER, STRING))
 		{
 			return new Expr.Literal(previous().literal);
+		}
+
+		if (match(IDENTIFIER))
+		{
+			return new Expr.Variable(previous());
 		}
 
 		if (match(LEFT_PAREN))
@@ -144,9 +201,9 @@ class Parser
 
 	private boolean match(TokenType... types)
 	{
-		for(TokenType type : types)
+		for (TokenType type : types)
 		{
-			if(check(type))
+			if (check(type))
 			{
 				advance();
 				return true;
